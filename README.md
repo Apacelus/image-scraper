@@ -1,2 +1,4 @@
-# image-downloader-python
-Small python script that autodownloads images from a screenshot sharing site. This was my first python script. 
+# image-scraper
+Python script for scraping images from https://imgur.com/ and https://prnt.sc/
+## Installation
+Download and run script
