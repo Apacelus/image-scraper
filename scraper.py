@@ -61,6 +61,8 @@ def initialize():
             print("Could not find or create path. Please enter a valid path.")
         except FileNotFoundError:
             print("Could not find or create path. Please enter a valid path.")
+        except PermissionError:
+            print("No write permission, please choose another path.")
         try:
             open(str(user_path) + r"\test", 'w').close()
             print("Can write to path")
