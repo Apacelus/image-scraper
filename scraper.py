@@ -139,7 +139,7 @@ def download_imgur(thread_id, path, pic_id):
             with open(str(path) + r"\image_" + str(thread_id) + "_" + str(pic_id) + ".jpg", "wb") as f:
                 print("Writing image")
                 f.write(urllib.request.urlopen(picture_as_request).read())
-            with open(str(path) + r"\link_to_image_" + str(thread_id) + "_" + str(pic_id) + ".txt", "w") as f:
+            with open(str(path) + r"\links_to_images" + str(thread_id) + ".txt", "a") as f:
                 f.write("https://i.imgur.com/" + image_url + "_d.webp?maxwidth=760&fidelity=grand")
             print("Image saved successfully")
     except HTTPError:
@@ -173,7 +173,7 @@ def download_prntsc(thread_id, path, pic_id):
             with open(str(path) + r"\image_" + str(thread_id) + "_" + str(pic_id) + ".jpg", "wb") as f:
                 print("Writing image")
                 f.write(urllib.request.urlopen(picture_as_request).read())
-            with open(str(path) + r"\link_to_image_" + str(thread_id) + "_" + str(pic_id) + ".txt", "w") as f:
+            with open(str(path) + r"\links_to_images" + str(thread_id) + ".txt", "a") as f:
                 f.write("https:" + html_code[begin:end])
             print("Image saved successfully")
     except HTTPError:
