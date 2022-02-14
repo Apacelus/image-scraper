@@ -50,19 +50,24 @@ def initialize():
                 print("Created path")
             if len(os.listdir(user_path)) == 0:
                 print("Directory is empty, good")
-                break
             else:
                 user_path = user_path + "_new"
                 try:
                     os.mkdir(user_path)
                     print("Directory not emtpy, writing to " + user_path)
-                    break
                 except FileExistsError:
                     print("Could not find or create path. Please enter a valid path.")
         except ValueError:
             print("Could not find or create path. Please enter a valid path.")
         except FileNotFoundError:
             print("Could not find or create path. Please enter a valid path.")
+        try:
+            open(str(user_path) + r"\test", 'w').close()
+            print("Can write to path")
+            os.remove(str(user_path) + r"\test")
+            break
+        except PermissionError:
+            print("No write permission, please choose another path.")
     while True:
         try:
             source = int(input("Source? Enter 1 for imgur, enter 2 for prnt.sc "))
