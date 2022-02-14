@@ -1,3 +1,4 @@
+import atexit
 from threading import Thread
 import os
 from random import randint
@@ -29,32 +30,42 @@ pic_not_found_bin = r'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\xa1\x00\x0
                     r'\x17Z\xa0n\x81\x16\xde\x1e^\xaaq\xb0\xab\xe0\x16\xbe\xed9\xfc\xf3\xf9\t\x93\x80\x88\xce\xd7u' \
                     r'"\xb2\x00\x00\x00\x00IEND\xaeB`\x82 '
 
+user_path = os.path.join(os.getcwd(), "downloaded_pics")
+threads_amount = 1
+
 
 def initialize():
-    infinite = False
+    global user_path
     while True:
         try:
-            amount_of_pictures = int(input("How many pictures should be downloaded? (-1 for infinite) "))
-            if amount_of_pictures == -1:
+            amount_of_pictures_string = input("How many pictures should be downloaded? Press Enter for infinite")
+            if amount_of_pictures_string == "":
+                amount_of_pictures = -1
                 print("To infinity and beyond!")
-            break
+                break
+            else:
+                amount_of_pictures = int(amount_of_pictures_string)
+                break
         except ValueError:
             print("Please enter a number.")
     while True:
         try:
-            user_path = input("Where to save? ")
-            if user_path[0] == '"':
-                user_path = user_path[1:len(user_path) - 1]
-            if not os.path.exists(user_path):
-                os.mkdir(user_path)
+            temp_path = input("Where to save? Press enter to save in the same directory as the script.")
+            if temp_path == "":
+                print("Using " + user_path + " as saving directory.")
+                temp_path = user_path
+            if temp_path[0] == '"':
+                temp_path = temp_path[1:len(temp_path) - 1]
+            if not os.path.exists(temp_path):
+                os.mkdir(temp_path)
                 print("Created path")
-            if len(os.listdir(user_path)) == 0:
+            if len(os.listdir(temp_path)) == 0:
                 print("Directory is empty, good")
             else:
-                user_path = user_path + "_new"
+                temp_path = temp_path + "_new"
                 try:
-                    os.mkdir(user_path)
-                    print("Directory not emtpy, writing to " + user_path)
+                    os.mkdir(temp_path)
+                    print("Directory not emtpy, writing to " + temp_path)
                 except FileExistsError:
                     print("Could not find or create path. Please enter a valid path.")
         except ValueError:
@@ -64,9 +75,11 @@ def initialize():
         except PermissionError:
             print("No write permission, please choose another path.")
         try:
-            open(str(user_path) + r"\test", 'w').close()
-            print("Can write to path")
-            os.remove(str(user_path) + r"\test")
+            temp_path = os.path.join(temp_path, '')
+            open(str(temp_path) + "test.txt", 'w').close()
+            print("Write permission available")
+            os.remove(str(temp_path) + "test.txt")
+            user_path = temp_path
             break
         except PermissionError:
             print("No write permission, please choose another path.")
@@ -85,42 +98,50 @@ def initialize():
             print("Please enter a number.")
     while True:
         try:
-            threads_amount = int(input("How many threads? The more threads the higher the download speed. Minimum 1 "))
-            if threads_amount < 1:
+            temp_threads_amount_string = input(
+                "How many threads? The more threads the higher the download speed. Enter for default ")
+            if temp_threads_amount_string == "":
+                temp_threads_amount = 1
+            else:
+                temp_threads_amount = int(temp_threads_amount_string)
+            if temp_threads_amount < 1:
                 print("Please enter a number higher than 0")
             else:
+                global threads_amount
+                threads_amount = temp_threads_amount
                 break
         except ValueError:
             print("Please enter a number higher than 0")
     # actual start
     for counter in range(threads_amount):
-        Thread(target=start, args=(counter, user_path, source, amount_of_pictures)).start()
-    print("Finished downloading")
+        Thread(target=start, args=(counter, source, amount_of_pictures), daemon=True).start()
+    while True:
+        input()
 
 
-def start(thread_id, path, source, amount):
+def start(thread_id, source, amount):
     counter = 0
     if source == 1:
         if amount == -1:
             while True:
-                if download_imgur(thread_id, path, counter) != "Error":
+                if download_imgur(thread_id, counter) != "Error":
                     counter += 1
         else:
             for counter in range(amount):
-                if download_imgur(thread_id, path, counter) != "Error":
+                if download_imgur(thread_id, counter) != "Error":
                     counter += 1
     elif source == 2:
         if amount == -1:
             while True:
-                if download_prntsc(thread_id, path, counter) != "Error":
+                if download_prntsc(thread_id, counter) != "Error":
                     counter += 1
         else:
             for counter in range(amount):
-                if download_prntsc(thread_id, path, counter) != "Error":
+                if download_prntsc(thread_id, counter) != "Error":
                     counter += 1
 
 
-def download_imgur(thread_id, path, pic_id):
+def download_imgur(thread_id, pic_id):
     print(thread_id)
     try:
         image_url = alphabet_imgur[randint(0, 61)] + alphabet_imgur[randint(0, 61)] + \
@@ -136,11 +157,12 @@ def download_imgur(thread_id, path, pic_id):
             print("Image non existent")
             return "Error"
         else:
-            with open(str(path) + r"\image_" + str(thread_id) + "_" + str(pic_id) + ".jpg", "wb") as f:
+            with open(str(user_path) + r"image_" + str(thread_id) + "_" + str(pic_id) + ".jpg", "wb") as f:
                 print("Writing image")
                 f.write(urllib.request.urlopen(picture_as_request).read())
-            with open(str(path) + r"\links_to_images" + str(thread_id) + ".txt", "a") as f:
-                f.write("https://i.imgur.com/" + image_url + "_d.webp?maxwidth=760&fidelity=grand")
+            with open(str(user_path) + r"links_to_images" + str(thread_id) + ".txt", "a") as f:
+                f.write(str(thread_id) + "_" + str(
+                    pic_id) + ": " + "https://i.imgur.com/" + image_url + "_d.webp?maxwidth=760&fidelity=grand" + "\n")
             print("Image saved successfully")
     except HTTPError:
         print("Too many requests?")
@@ -148,9 +170,10 @@ def download_imgur(thread_id, path, pic_id):
     except ValueError:
         print("Value error?")
         return "Error"
+    print("Finished downloading in thread " + str(thread_id))
 
 
-def download_prntsc(thread_id, path, pic_id):
+def download_prntsc(thread_id, pic_id):
     try:
         image_url = alphabet_prntsc[randint(0, 35)] + alphabet_prntsc[randint(0, 35)] + \
                     alphabet_prntsc[randint(0, 35)] + alphabet_prntsc[randint(0, 35)] + \
@@ -170,11 +193,11 @@ def download_prntsc(thread_id, path, pic_id):
             print("Image non existent")
             return "Error"
         else:
-            with open(str(path) + r"\image_" + str(thread_id) + "_" + str(pic_id) + ".jpg", "wb") as f:
+            with open(str(user_path) + r"image_" + str(thread_id) + "_" + str(pic_id) + ".jpg", "wb") as f:
                 print("Writing image")
                 f.write(urllib.request.urlopen(picture_as_request).read())
-            with open(str(path) + r"\links_to_images" + str(thread_id) + ".txt", "a") as f:
-                f.write("https:" + html_code[begin:end])
+            with open(str(user_path) + r"links_to_images" + str(thread_id) + ".txt", "a") as f:
+                f.write(str(thread_id) + "_" + str(pic_id) + ": " + "https:" + html_code[begin:end] + "\n")
             print("Image saved successfully")
     except HTTPError:
         print("Too many requests?")
@@ -182,6 +205,22 @@ def download_prntsc(thread_id, path, pic_id):
     except ValueError:
         print("Value error?")
         return "Error"
+    print("Finished downloading in thread " + str(thread_id))
 
 
+def exit_handler():
+    print("Just a second, finishing up. \nDONT TERMINATE THE PROGRAM OR YOU WILL LOOSE ALL THE LINKS!")
+    temp_links_storage = ""
+    for index in range(threads_amount):
+        try:
+            with open(str(user_path) + r"links_to_images" + str(index) + ".txt", "r") as f:
+                temp_links_storage = temp_links_storage + f.read()
+            os.remove(str(user_path) + r"links_to_images" + str(index) + ".txt")
+        except FileNotFoundError:
+            continue
+    with open(str(user_path) + r"links_to_images.txt", "w") as f:
+        f.write(temp_links_storage)
+
+
+atexit.register(exit_handler)
 initialize()
