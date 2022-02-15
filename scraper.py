@@ -8,7 +8,7 @@ from urllib.error import HTTPError, URLError
 alphabet_imgur = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
                   "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" "A", "B", "C", "D",
                   "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X",
-                  "Y", "Z", ]
+                  "Y", "Z"]
 
 save_path = os.path.join(os.getcwd(), "downloaded_pics")
 threads_amount = 1
@@ -124,10 +124,10 @@ def start(thread_id, source, amount):
 def download_imgur(thread_id, pic_id):
     print(thread_id)
     try:
-        image_url = alphabet_imgur[randint(0, 61)] + alphabet_imgur[randint(0, 61)] + \
-                    alphabet_imgur[randint(0, 61)] + alphabet_imgur[randint(0, 61)] + \
-                    alphabet_imgur[randint(0, 61)] + alphabet_imgur[randint(0, 61)] + \
-                    alphabet_imgur[randint(0, 61)]
+        image_url = alphabet_imgur[randint(0, 60)] + alphabet_imgur[randint(0, 60)] + \
+                    alphabet_imgur[randint(0, 60)] + alphabet_imgur[randint(0, 60)] + \
+                    alphabet_imgur[randint(0, 60)] + alphabet_imgur[randint(0, 60)] + \
+                    alphabet_imgur[randint(0, 60)]
         print("https://i.imgur.com/" + image_url + "_d.webp?maxwidth=760&fidelity=grand")
         picture_as_request = urllib.request.Request(
             url="https://i.imgur.com/" + image_url + "_d.webp?maxwidth=760&fidelity=grand", headers={
